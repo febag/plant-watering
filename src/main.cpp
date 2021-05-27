@@ -1,21 +1,29 @@
 #include <Arduino.h>
 
-const int waitingTime = 10;   // Seconds
-const int wateringTime = 3;   // Seconds
-const int pinBuzzer = 9;
+const int waitingTime = 1800;   // Seconds
+const int wateringTime = 3;     // Seconds
+const int pinPushButton = 8;
+const int pinPump = 9;
+const unsigned long debounceDelay = 50;
 
 int secondsElapsed = 0;
 
 unsigned long startTime;
 unsigned long currentTime;
+unsigned long lastDebounceTime = 0;
+
 
 bool initCounter;
+bool buttonState;
+bool prevButtonState;
 
 int status;   // 1 = Waiting, 2 = Watering
 
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(pinPushButton, INPUT_PULLUP);
+  pinMode(pinPump, OUTPUT);
   //Serial.begin(9600);
   status = 1;
 }
@@ -36,20 +44,35 @@ void loop() {
     initCounter = true;
   }
 
-  /*Serial.print("Contador: ");
-  Serial.println(secondsElapsed);
+  /*Serial.print("Pulsador: ");
+  Serial.println(buttonState);
 
   Serial.print("Estado: ");
   Serial.println(status);
 
   delay(1000);*/
 
+  // Button pressed -> Go to status 2
+  buttonState = digitalRead(pinPushButton);
+
+  if (buttonState != prevButtonState){
+    lastDebounceTime = millis();
+  }
+
+  if ((millis()-lastDebounceTime) > debounceDelay){
+    // Only change status if the button has been pressed
+    if (buttonState == LOW){
+      secondsElapsed = 0;
+      status = 2;
+    }
+  }
+
   // Pump activation
 
   switch (status){
     case 1:
       digitalWrite(LED_BUILTIN, LOW);
-      noTone(pinBuzzer);
+      digitalWrite(pinPump, LOW);
 
       if (secondsElapsed == waitingTime){
         secondsElapsed = 0;
@@ -59,7 +82,7 @@ void loop() {
 
     case 2:
       digitalWrite(LED_BUILTIN, HIGH);
-      tone(pinBuzzer, 440);
+      digitalWrite(pinPump, HIGH);
 
       if (secondsElapsed == wateringTime){
         secondsElapsed = 0;
