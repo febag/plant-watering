@@ -1,12 +1,12 @@
 #include <Arduino.h>
 
-const int waitingTime = 1800;   // Seconds
-const int wateringTime = 3;     // Seconds
+const unsigned long waitingTime = 259200;   // 3 days in seconds
+const unsigned long wateringTime = 120;     // Seconds
 const int pinPushButton = 8;
 const int pinPump = 9;
-const unsigned long debounceDelay = 50;
+const unsigned long debounceDelay = 50;     // miliseconds
 
-int secondsElapsed = 0;
+unsigned long secondsElapsed = 0;
 
 unsigned long startTime;
 unsigned long currentTime;
@@ -66,6 +66,8 @@ void loop() {
       status = 2;
     }
   }
+
+  prevButtonState = buttonState;
 
   // Pump activation
 
