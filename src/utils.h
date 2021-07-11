@@ -1,0 +1,1 @@
+bool debounce(bool buttonState);
